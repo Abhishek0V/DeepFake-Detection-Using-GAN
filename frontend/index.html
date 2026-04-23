@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VoiceGuard - Advanced AI Voice Spoof Detection">
+    <title>VoiceGuard - Voice Spoof Detection AI</title>
+    <!-- Modern Typeface -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Define White/Orange Theme */
+            --primary: #FF6200;       /* Vibrant Orange */
+            --primary-light: #FF8533; 
+            --primary-hover: #E65800;
+            --primary-alpha: rgba(255, 98, 0, 0.1);
+            
+            --bg-color: #F8F9FB;      /* Off-white background */
+            --card-bg: #FFFFFF;
+            
+            --text-dark: #1E232A;
+            --text-muted: #6B7280;
+            
+            --border-light: #E5E7EB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- Header / Navbar --- */
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1.25rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 98, 0, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-dark);
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        /* --- Main Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Hero Text */
+        .hero {
+            text-align: center;
+            margin-bottom: 5rem;
+            animation: fadeInDown 0.8s ease-out;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+        }
+
+        .hero h1 span.gradient-text {
+            background: linear-gradient(135deg, var(--primary), #FF3300);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 1.25rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            outline: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 98, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 12px 35px rgba(255, 98, 0, 0.4);
+            transform: translateY(-3px);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @media (max-width: 900px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+            .hero h1 {
+                font-size: 3rem;
+            }
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(255, 98, 0, 0.08);
+            border-color: rgba(255, 98, 0, 0.2);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-alpha);
+            color: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2.5rem;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-light);
+            background: var(--card-bg);
+            margin-top: auto;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" x2="12" y1="19" y2="22"></line>
+                </svg>
+            </div>
+            <div class="logo-text">Voice<span>Guard</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link" style="color: var(--primary); font-weight: 600;">Home</a>
+            <a href="#features" class="nav-link">Features</a>
+            <a href="dashboard.html" class="nav-link">Detector</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>Identify Fake Voices in <span class="gradient-text">Seconds</span></h1>
+            <p>Ensure the authenticity of your audio. Upload a file to instantly determine if the voice is real or artificially generated by modern AI tools.</p>
+            <a href="dashboard.html" class="btn btn-primary">
+                Start Detection
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features" id="features">
+            <!-- Feature 1 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                </div>
+                <h3>High Accuracy</h3>
+                <p>Industry-leading deep learning models analyze audio waveforms to detect subtle anomalies invisible to the human ear.</p>
+            </div>
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <h3>Lightning Fast</h3>
+                <p>Process and verify audio clips in real-time. Get reliable spoof detection results within seconds of uploading.</p>
+            </div>
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <h3>Secure & Private</h3>
+                <p>Your audio files are processed securely. We guarantee data privacy and do not store your sensitive media.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        &copy; 2026 VoiceGuard Systems. Engineered for authenticity.
+    </footer>
+
+</body>
+</html>
