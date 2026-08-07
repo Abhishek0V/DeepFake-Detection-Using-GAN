@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VoiceGuard Dashboard - Analyze audio for spoof detection.">
+    <title>Dashboard - VoiceGuard AI</title>
+    <!-- Modern Typeface -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Define White/Orange Theme */
+            --primary: #FF6200;       /* Vibrant Orange */
+            --primary-light: #FF8533; 
+            --primary-hover: #E65800;
+            --primary-alpha: rgba(255, 98, 0, 0.1);
+            
+            --bg-color: #F8F9FB;      /* Off-white background */
+            --card-bg: #FFFFFF;
+            
+            --text-dark: #1E232A;
+            --text-muted: #6B7280;
+            
+            --border-light: #E5E7EB;
+            
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- Header / Navbar --- */
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1.25rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 98, 0, 0.3);
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-dark);
+        }
+
+        .logo-text span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+
+        /* --- Main Layout --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Dashboard Header */
+        .dash-header {
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.6s ease-out;
+            display: flex;
+            justify-content: space-between;
+            align-items:flex-end;
+        }
+
+        .dash-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .dash-header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Dashboard Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Component */
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-light);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.06);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 12px;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-alpha);
+            color: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card h2 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Upload Area */
+        .upload-zone {
+            border: 2px dashed rgba(255, 98, 0, 0.4);
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #FAFAFB;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-alpha);
+        }
+
+        .upload-svg {
+            color: var(--primary);
+            transition: transform 0.3s;
+        }
+
+        .upload-zone:hover .upload-svg {
+            transform: translateY(-5px);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+        }
+
+        .upload-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        #fileName {
+            margin-top: 1rem;
+            font-weight: 500;
+            color: var(--primary);
+            word-break: break-all;
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 2rem;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 98, 0, 0.25);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(255, 98, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #D1D5DB;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Results Area */
+        .result-box {
+            height: 100%;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: var(--bg-color);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border-light);
+            transition: all 0.5s ease;
+        }
+
+        .status-pill {
+            padding: 0.5rem 1.25rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .status-idle {
+            background: #E5E7EB;
+            color: var(--text-muted);
+        }
+
+        .result-main {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.75rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            transition: color 0.3s ease;
+        }
+
+        .confidence-label {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        .confidence-val {
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+        }
+
+        /* Custom Audio Player */
+        .audio-preview {
+            margin-top: 1.5rem;
+            width: 100%;
+            display: none;
+        }
+        audio {
+            width: 100%;
+            height: 48px;
+            border-radius: 24px;
+            outline: none;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: var(--bg-color);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Spin Animation */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-light);
+            background: var(--card-bg);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" x2="12" y1="19" y2="22"></line>
+                </svg>
+            </div>
+            <div class="logo-text">Voice<span>Guard</span></div>
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Home</a>
+            <a href="index.html#features" class="nav-link">Features</a>
+            <a href="#" class="nav-link active" style="font-weight: 600;">Detector</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <div class="dash-header">
+            <div>
+                <h1>Audio Verification Dashboard</h1>
+                <p>Upload your file below for instant deepfake voice detection.</p>
+            </div>
+            <div>
+                <a href="index.html" class="btn btn-primary" style="padding: 0.5rem 1rem; width: auto; margin-top: 0; font-size: 0.9rem; box-shadow: none;">
+                    &larr; Back to Home
+                </a>
+            </div>
+        </div>
+
+        <!-- App Grid -->
+        <div class="grid">
+            
+            <!-- Analysis Input Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <h2>Input Audio</h2>
+                </div>
+                
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="upload-zone" id="dropArea">
+                        <input type="file" id="audioInput" accept=".wav,.flac,.mp3,.ogg" class="file-input">
+                        <svg class="upload-svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" x2="12" y1="3" y2="15"></line>
+                        </svg>
+                        <div>
+                            <div class="upload-title">Click to upload or drag & drop</div>
+                            <div class="upload-subtitle">WAV, FLAC, MP3 (Max 10MB)</div>
+                        </div>
+                        <div id="fileName"></div>
+                    </div>
+
+                    <div class="audio-preview" id="audioPreviewContainer">
+                        <audio id="audioPreview" controls></audio>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="analyzeBtn" disabled>
+                        <span>Analyze Audio</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Result Output Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M12 16v-4"></path>
+                            <path d="M12 8h.01"></path>
+                        </svg>
+                    </div>
+                    <h2>AI Diagnosis</h2>
+                </div>
+                
+                <div class="result-box" id="resultBox">
+                    <div class="status-pill status-idle" id="statusBadge">Awaiting Audio</div>
+                    <div class="result-main" id="resultText">--</div>
+                    <div class="confidence-label">Model Confidence: <span class="confidence-val" id="confidenceVal">--%</span></div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        &copy; 2026 VoiceGuard Systems. Engineered for authenticity.
+    </footer>
+
+    <script>
+        const dropArea = document.getElementById('dropArea');
+        const audioInput = document.getElementById('audioInput');
+        const fileNameDisplay = document.getElementById('fileName');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const uploadForm = document.getElementById('uploadForm');
+        
+        const audioPreviewContainer = document.getElementById('audioPreviewContainer');
+        const audioPreview = document.getElementById('audioPreview');
+
+        const statusBadge = document.getElementById('statusBadge');
+        const resultText = document.getElementById('resultText');
+        const confidenceVal = document.getElementById('confidenceVal');
+        const resultBox = document.getElementById('resultBox');
+
+        // Reset UI Function
+        function resetUI() {
+            statusBadge.className = 'status-pill status-idle';
+            statusBadge.textContent = 'Ready';
+            resultText.textContent = '--';
+            resultText.style.color = 'var(--text-dark)';
+            confidenceVal.textContent = '--%';
+            resultBox.style.background = 'var(--bg-color)';
+            resultBox.style.borderColor = 'var(--border-light)';
+            resultBox.style.boxShadow = 'none';
+        }
+
+        // Drag & Drop Handlers
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('dragover'), false);
+        });
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        audioInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                
+                // Validate file type
+                if (file.type.indexOf('audio/') === -1 && !file.name.match(/\.(wav|flac|mp3|ogg)$/i)) {
+                    alert('Please select a valid audio file.');
+                    return;
+                }
+
+                fileNameDisplay.textContent = file.name;
+                analyzeBtn.disabled = false;
+                resetUI();
+
+                // Setup audio preview
+                const fileURL = URL.createObjectURL(file);
+                audioPreview.src = fileURL;
+                audioPreviewContainer.style.display = 'block';
+            }
+        }
+
+        // Form Submit / Analysis Simulation
+        uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (audioInput.files.length === 0) return;
+
+            // UI Loading State
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = `
+                <svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <line x1="12" y1="18" x2="12" y2="22"></line>
+                    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+                    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+                    <line x1="2" y1="12" x2="6" y2="12"></line>
+                    <line x1="18" y1="12" x2="22" y2="12"></line>
+                    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+                    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+                </svg>
+                <span>Processing...</span>
+            `;
+            
+            statusBadge.className = 'status-pill status-idle';
+            statusBadge.style.background = 'var(--primary-alpha)';
+            statusBadge.style.color = 'var(--primary)';
+            statusBadge.textContent = 'Extracting Features...';
+            resultText.textContent = '...';
+            confidenceVal.textContent = '--%';
+
+            // Simulate Network Request / AI Processing
+            setTimeout(() => {
+                // Determine mock result
+                const isSpoof = Math.random() > 0.5;
+                const confidence = isSpoof 
+                    ? (Math.random() * (99.9 - 95.0) + 95.0).toFixed(2)
+                    : (Math.random() * (99.9 - 92.0) + 92.0).toFixed(2);
+
+                // Update UI based on result
+                if (isSpoof) {
+                    statusBadge.className = 'status-pill';
+                    statusBadge.style.background = '#FEE2E2';
+                    statusBadge.style.color = 'var(--danger, #EF4444)';
+                    statusBadge.textContent = 'Synthetic Audio Detected';
+                    
+                    resultText.textContent = 'SPOOF';
+                    resultText.style.color = 'var(--danger, #EF4444)';
+                    
+                    resultBox.style.background = '#FEF2F2';
+                    resultBox.style.borderColor = '#FECACA';
+                    resultBox.style.boxShadow = '0 0 0 4px #FEE2E2';
+                } else {
+                    statusBadge.className = 'status-pill';
+                    statusBadge.style.background = '#D1FAE5';
+                    statusBadge.style.color = 'var(--success, #10B981)';
+                    statusBadge.textContent = 'Authentic Audio';
+                    
+                    resultText.textContent = 'BONAFIDE';
+                    resultText.style.color = 'var(--success, #10B981)';
+                    
+                    resultBox.style.background = '#F0FDF4';
+                    resultBox.style.borderColor = '#A7F3D0';
+                    resultBox.style.boxShadow = '0 0 0 4px #D1FAE5';
+                }
+
+                confidenceVal.textContent = confidence + '%';
+                
+                // Reset Button
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = `
+                    <span>Analyze Another</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 2v6h-6"></path>
+                        <path d="M3 12a9 9 0 1 0 2.13-5.88L2 12"></path>
+                    </svg>
+                `;
+            }, 2500);
+        });
+    </script>
+</body>
+</html>
