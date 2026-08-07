@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+.Python
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+uenv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ML / data / model artifacts
+*.h5
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.pkl
+checkpoints/
+logs/
+runs/
+wandb/
+*.csv
+*.npy
+*.npz
+data/
+datasets/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Environment / secrets
+.env
+*.env
+
+# Large media (adjust if you actually need to track sample outputs)
+*.mp4
+*.wav
+*.jpg
+*.png

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceGuard AI - Deepfake & Spoofing Detector</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="glow-bg"></div>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <div>
+                    <h1>VoiceGuard <span class="accent">AI</span></h1>
+                    <p class="tagline">Audio Anti-Spoofing & Deepfake Detection</p>
+                </div>
+            </div>
+
+            <!--<div class="model-badge">
+                <span class="pulse-dot"></span>
+                <span>AASIST-L v6 Active</span>
+            </div> -->
+        </header>
+
+        <!-- Main Content Grid -->
+        <main class="grid-container">
+            <!-- Left Side: Inputs -->
+            <section class="panel upload-section">
+                <h2><i class="fa-solid fa-microphone-lines section-icon"></i> Audio Analyzer</h2>
+                <p class="description">Upload an audio file or record directly using your microphone. Our AASIST-L deep learning model will run structural analysis on the waveform.</p>
+
+                <!-- Tabs -->
+                <div class="tab-container">
+                    <button class="tab-btn active" id="tab-upload" onclick="switchTab('upload')">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                    </button>
+                    <button class="tab-btn" id="tab-record" onclick="switchTab('record')">
+                        <i class="fa-solid fa-microphone"></i> Record Live
+                    </button>
+                </div>
+
+                <!-- Tab 1: Upload Dropzone -->
+                <div class="tab-content active" id="content-upload">
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" id="file-input" accept="audio/*" class="file-input">
+                        <i class="fa-solid fa-arrow-up-from-bracket upload-icon"></i>
+                        <h3>Drag & drop audio file here</h3>
+                        <p class="upload-hint">Supports WAV, FLAC, MP3, etc. (Auto-resampled to 16kHz)</p>
+                        <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">Browse Files</button>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Record Panel -->
+                <div class="tab-content" id="content-record">
+                    <div class="recorder-container">
+                        <canvas class="visualizer" id="visualizer"></canvas>
+                        <div class="recorder-timer" id="record-timer">00:00</div>
+                        <div class="recorder-controls">
+                            <button class="record-btn" id="record-btn" onclick="toggleRecording()">
+                                <i class="fa-solid fa-circle icon-record" id="record-icon"></i>
+                            </button>
+                            <p class="record-status" id="record-status">Click to start recording</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected File Display -->
+                <div class="selected-file-card" id="selected-file-card">
+                    <div class="file-info">
+                        <i class="fa-solid fa-file-audio file-icon"></i>
+                        <div class="file-details">
+                            <span class="file-name" id="file-name">filename.wav</span>
+                            <span class="file-size" id="file-size">0.0 MB</span>
+                        </div>
+                    </div>
+                    <button class="btn-remove" onclick="resetFile()"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <!-- Action Button -->
+                <button class="btn btn-primary btn-block" id="analyze-btn" disabled onclick="analyzeAudio()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Run Anti-Spoofing Analysis
+                </button>
+            </section>
+
+            <!-- Right Side: Results -->
+            <section class="panel results-section" id="results-panel">
+                <div class="results-empty" id="results-empty">
+                    <div class="empty-icon-container">
+                        <i class="fa-solid fa-chart-bar empty-icon"></i>
+                    </div>
+                    <h3>Analysis Results</h3>
+                    <p>Provide audio input and trigger the model to view detailed spoofing vulnerability reports.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state" id="loading-state">
+                    <div class="spinner"></div>
+                    <h3>Extracting SincConv Features</h3>
+                    <p>Running HeteroGraphAttention network inference...</p>
+                </div>
+
+                <!-- Results Content -->
+                <div class="results-content" id="results-content">
+                    <div class="result-header">
+                        <h2>Analysis Complete</h2>
+                        <span class="badge" id="risk-badge">High Risk</span>
+                    </div>
+
+                    <!-- Main Verdict Card -->
+                    <div class="verdict-card" id="verdict-card">
+                        <div class="verdict-icon-container">
+                            <i class="fa-solid fa-triangle-exclamation verdict-icon" id="verdict-icon"></i>
+                        </div>
+                        <div class="verdict-text-container">
+                            <span class="verdict-label">Classification Verdict</span>
+                            <span class="verdict-value" id="verdict-value">SPOOFED / DEEPFAKE</span>
+                        </div>
+                    </div>
+
+                    <!-- Scientific Score Details -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <span class="metric-label">Model Confidence</span>
+                            <span class="metric-value" id="confidence-value">92.4%</span>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="confidence-bar"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <span class="metric-label">Spoofing Score</span>
+                            <span class="metric-value" id="spoof-score-value">0.7240</span>
+                            <div class="score-line-container">
+                                <div class="score-dot" id="score-dot"></div>
+                                <div class="score-threshold-line" title="EER Threshold: 0.0651"></div>
+                            </div>
+                            <span class="metric-sub">Decision Threshold: 0.0651</span>
+                        </div>
+                    </div>
+
+                    <!-- Audio Playback Card -->
+                    <div class="audio-playback-card">
+                        <h3>Input Audio Preview</h3>
+                        <audio id="audio-preview" controls></audio>
+                    </div>
+
+                    <!-- Grad-CAM Heatmap Card -->
+                    <div class="audio-playback-card" id="heatmap-card" style="display: none;">
+                        <h3 style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="fa-solid fa-eye"></i> Grad-CAM Saliency Map</span>
+                            <span style="font-size: 0.7rem; background: rgba(99, 102, 241, 0.2); color: var(--accent); padding: 2px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase;">XAI Active</span>
+                        </h3>
+                        <div style="position: relative; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--panel-border); background: #0b0f19;">
+                            <img id="heatmap-img" src="" alt="Grad-CAM Saliency Map" style="width: 100%; display: block; transition: opacity 0.3s ease;">
+                        </div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; margin-top: 4px;">
+                            Saliency map overlays the fused early features from spectral & temporal encoders on the Mel Spectrogram. Bright regions (red/yellow) denote high spoof saliency.
+                        </p>
+                    </div>
+
+                    <!-- Forensic Info -->
+                    <div class="forensic-info">
+                        <h3><i class="fa-solid fa-circle-info"></i> Model Forensic Insights</h3>
+                        <ul>
+                            <li><strong>Model Core:</strong> SincConv filterbank extract (70 channels)</li>
+                            <li><strong>Evaluation:</strong> Graph Attention networks over spectrogram slices</li>
+                            <li><strong>Security Status:</strong> <span id="security-status-text">Audio displays signature anomalies matching synthetic voice models.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>VoiceGuard AI &copy; 2026. Powered by PyTorch & AASIST-L Anti-Spoofing Architecture (EER 2.74%).</p>
+        </footer>
+    </div>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

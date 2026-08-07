@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceGuard AI - Project Presentation</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- STYLE SYSTEM & BRAND TOKENS (LIGHT THEME MATCHING STYLE.CSS) --- */
+        :root {
+            --bg-main: #f8fafc;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --panel-border-focus: rgba(255, 145, 25, 0.8);
+            
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            
+            --accent: rgba(255, 145, 25, 0.986);
+            --accent-gradient: linear-gradient(135deg, rgba(255, 145, 25, 0.986) 0%, rgba(255, 119, 0, 0.952) 100%);
+            --accent-glow: rgba(255, 145, 25, 0.2);
+            
+            --safe: #10b981;
+            --safe-glow: rgba(16, 185, 129, 0.15);
+            --threat: #ef4444;
+            --threat-glow: rgba(239, 68, 68, 0.15);
+            --warning: #f59e0b;
+            
+            --font-heading: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 8px;
+            
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* --- GLOBAL RESET & BASE --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- GLOW BACKGROUND --- */
+        .glow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 10% 20%, rgba(255, 145, 25, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.02) 0%, transparent 60%);
+        }
+
+        /* --- DECK STRUCTURE --- */
+        .deck-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem;
+        }
+
+        /* --- HEADER & BRANDING --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 1.25rem;
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px rgba(255, 145, 25, 0.4));
+        }
+
+        .brand h1 {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .brand h1 .accent {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .presentation-title-badge {
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--panel-border);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* --- SLIDE DISPLAY AREA --- */
+        .slide-stage {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            margin: 1.5rem 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(40px) scale(0.98);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(0) scale(1);
+        }
+
+        .slide.prev-slide {
+            transform: translateX(-40px) scale(0.98);
+        }
+
+        /* --- SLIDE COMMON STYLINGS --- */
+        .slide-title-area {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .slide-subtitle {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+
+        .slide-title {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .slide-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* --- BUTTONS & INTERACTIVE ELEMENTS --- */
+        .btn {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--panel-border);
+            background: var(--panel-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(255, 145, 25, 0.15);
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 18px rgba(255, 145, 25, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* --- GRID SCHEMES FOR SLIDES --- */
+        .grid-half {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .grid-third {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.5rem;
+            width: 100%;
+        }
+
+        /* Glassmorphic Presentation Cards */
+        .slide-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            box-shadow: 0 8px 30px -10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .slide-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px -15px rgba(0, 0, 0, 0.08);
+            border-color: var(--panel-border-focus);
+        }
+
+        .slide-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slide-card ul {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .slide-card li {
+            position: relative;
+            padding-left: 1.25rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .slide-card li::before {
+            content: "•";
+            color: var(--accent);
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            top: -0.1rem;
+        }
+
+        /* --- SLIDE 1: TITLE SLIDE SPECIFICS --- */
+        .title-slide-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            gap: 1.5rem;
+        }
+
+        .title-slide-logo {
+            font-size: 5rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(255, 145, 25, 0.35));
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .title-slide-content h2 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .title-slide-content h2 .accent {
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .title-slide-tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            max-width: 600px;
+        }
+
+        .title-slide-meta {
+            display: flex;
+            gap: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            border-top: 1px solid var(--panel-border);
+            padding-top: 1.25rem;
+        }
+
+        .title-slide-meta span i {
+            color: var(--accent);
+            margin-right: 0.25rem;
+        }
+
+        /* --- SLIDE 3: EXISTING VS PROPOSED SYSTEM TABLE --- */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            width: 100%;
+        }
+
+        .comp-column {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 8px 30px -10px rgba(0, 0, 0, 0.05);
+            transition: var(--transition-smooth);
+        }
+
+        .comp-column.baseline {
+            border-left: 5px solid var(--text-muted);
+        }
+
+        .comp-column.proposed {
+            border-left: 5px solid var(--accent);
+            background: rgba(255, 145, 25, 0.02);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+
+        .comp-column h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comp-column.baseline h3 {
+            color: var(--text-secondary);
+        }
+
+        .comp-column.proposed h3 {
+            color: #d97706; /* darker amber for contrast on light bg */
+        }
+
+        .comp-features {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comp-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            font-size: 0.88rem;
+            line-height: 1.4;
+        }
+
+        .comp-item i {
+            margin-top: 0.15rem;
+            font-size: 1rem;
+        }
+
+        .comp-column.baseline .comp-item i {
+            color: var(--threat);
+        }
+
+        .comp-column.proposed .comp-item i {
+            color: var(--safe);
+        }
+
+        .comp-column.proposed .comp-item strong {
+            color: var(--text-primary);
+        }
+
+        /* --- SLIDE 4 & 5: AASIST ARCHITECTURE DIAGRAMS --- */
+        .diagram-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px dashed var(--panel-border);
+            border-radius: var(--radius-md);
+        }
+
+        .diagram-svg {
+            width: 100%;
+            height: auto;
+            max-height: 380px;
+        }
+
+        /* SVG Node Animations */
+        .svg-node {
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+        
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 145, 25, 0.4));
+        }
+
+        .svg-node:hover rect, .svg-node:hover ellipse {
+            stroke: var(--accent);
+            stroke-width: 2.5px;
+            fill: #fffbeb;
+        }
+
+        .svg-node:hover text {
+            fill: #b45309;
+            font-weight: 700;
+        }
+
+        /* --- SLIDE 9: INTERACTIVE SYSTEM FLOW --- */
+        .flow-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            padding: 1.5rem 0;
+        }
+
+        .flow-step {
+            width: 14%;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition-smooth);
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .flow-step i {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+        }
+
+        .flow-step h4 {
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .flow-step p {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            line-height: 1.3;
+        }
+
+        .flow-step:hover, .flow-step.active {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+            background: #ffffff;
+        }
+
+        .flow-step:hover i, .flow-step.active i {
+            color: var(--accent);
+            transform: scale(1.15);
+        }
+
+        .flow-line-bg {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            right: 5%;
+            height: 2px;
+            background: var(--panel-border);
+            z-index: 1;
+            transform: translateY(-50%);
+        }
+
+        .flow-line-progress {
+            position: absolute;
+            top: 50%;
+            left: 5%;
+            width: 0%;
+            height: 2px;
+            background: var(--accent-gradient);
+            z-index: 1.5;
+            transform: translateY(-50%);
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .flow-detail-card {
+            background: rgba(255, 145, 25, 0.03);
+            border: 1px solid var(--panel-border-focus);
+            border-radius: var(--radius-md);
+            padding: 1.25rem;
+            width: 100%;
+            min-height: 110px;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .flow-detail-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            background: #fffbeb;
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 145, 25, 0.2);
+        }
+
+        .flow-detail-text h4 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #d97706;
+            margin-bottom: 0.25rem;
+        }
+
+        .flow-detail-text p {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* --- BOTTOM CONTROL BAR --- */
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--panel-border);
+            padding-top: 1.25rem;
+            z-index: 10;
+        }
+
+        .nav-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .slide-counter {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            min-width: 75px;
+            text-align: center;
+        }
+
+        .deck-progress-bar-container {
+            flex: 1;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            margin: 0 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .deck-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-gradient);
+            border-radius: 10px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 6px var(--accent);
+        }
+
+        .utility-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* --- SLIDEOUT SIDEBAR FOR TABLE OF CONTENTS --- */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -320px;
+            width: 320px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid var(--panel-border);
+            box-shadow: 15px 0 30px rgba(0, 0, 0, 0.03);
+            z-index: 100;
+            transition: var(--transition-smooth);
+            padding: 2.5rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-header h2 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .sidebar-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+        }
+
+        .sidebar-close:hover {
+            color: var(--threat);
+        }
+
+        .toc-list {
+            list-style-type: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .toc-item {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toc-item:hover {
+            background: rgba(255, 145, 25, 0.05);
+            color: var(--accent);
+            padding-left: 20px;
+        }
+
+        .toc-item.active {
+            background: var(--accent-gradient);
+            color: white;
+            font-weight: 600;
+        }
+
+        .toc-item.active span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .toc-item span {
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* --- SPEAKER NOTES PANEL --- */
+        .notes-panel {
+            position: fixed;
+            bottom: -220px;
+            left: 0;
+            right: 0;
+            height: 220px;
+            background: #ffffff;
+            border-top: 1px solid var(--panel-border);
+            box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.05);
+            z-index: 90;
+            transition: var(--transition-smooth);
+            padding: 1.75rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .notes-panel.open {
+            bottom: 0;
+        }
+
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .notes-header h3 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notes-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            transition: var(--transition-smooth);
+        }
+
+        .notes-close:hover {
+            color: var(--text-primary);
+        }
+
+        .notes-content {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .notes-content ul {
+            margin-left: 1.25rem;
+            margin-top: 0.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        /* --- HELP MODAL OVERLAY --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--panel-border);
+            width: 90%;
+            max-width: 450px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-card h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 0.75rem;
+        }
+
+        .modal-card h3 i {
+            color: var(--accent);
+        }
+
+        .keyboard-shortcuts-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.75rem 1.5rem;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .k-key {
+            background: #f1f5f9;
+            border: 1px solid var(--panel-border);
+            border-bottom: 3px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-family: monospace;
+            font-weight: 700;
+            text-align: center;
+            min-width: 35px;
+            display: inline-block;
+        }
+
+        /* --- PRINT STYLESHEET (CONVERTS PRESENTATION TO A PERFECT 11-PAGE DOCUMENT FOR PDF EXPORTS) --- */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            
+            body, .deck-container {
+                height: auto !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+                padding: 0 !important;
+            }
+
+            .glow-bg, header, .bottom-bar, .sidebar, .notes-panel, .modal-overlay, .btn {
+                display: none !important;
+            }
+
+            .slide-stage {
+                display: block !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            .slide {
+                position: relative !important;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                transform: none !important;
+                display: flex !important;
+                height: 100vh !important;
+                page-break-after: always !important;
+                justify-content: center !important;
+                padding: 4rem !important;
+                box-sizing: border-box !important;
+            }
+
+            .slide-card, .comp-column {
+                background: #ffffff !important;
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+
+            .comp-column.proposed {
+                border-left: 5px solid var(--accent) !important;
+            }
+
+            .diagram-container {
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+            }
+
+            .flow-step {
+                background: #ffffff !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow-bg"></div>
+    
+    <div class="deck-container">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <i class="fa-solid fa-shield-halved logo-icon"></i>
+                <div>
+                    <h1>VoiceGuard <span class="accent">AI</span></h1>
+                </div>
+            </div>
+            <div class="presentation-title-badge">
+                <i class="fa-solid fa-desktop"></i> Technical Presentation
+            </div>
+        </header>
+
+        <!-- Slide Stage -->
+        <main class="slide-stage">
+            
+            <!-- Slide 1: Title -->
+            <div class="slide active" id="slide-1">
+                <div class="title-slide-content">
+                    <i class="fa-solid fa-shield-halved title-slide-logo"></i>
+                    <h2>VoiceGuard <span class="accent">AI</span></h2>
+                    <p class="title-slide-tagline">Audio Anti-Spoofing & Deepfake Detection with AASIST-L v7 and Explainable AI (Grad-CAM)</p>
+                    
+                    <div class="title-slide-meta">
+                        <span><i class="fa-solid fa-microchip"></i> PyTorch AASIST Model</span>
+                        <span><i class="fa-solid fa-eye"></i> White-Box Explainability</span>
+                        <span><i class="fa-solid fa-check-double"></i> EER: 2.28% - 2.74%</span>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="nextSlide()" style="margin-top: 1rem;">
+                        Start Presentation <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Slide 2: The Threat Landscape -->
+            <div class="slide" id="slide-2">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">01 / Background</span>
+                    <h2 class="slide-title">The Threat Landscape: Speech Deepfakes</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <p style="font-size: 1.1rem; color: var(--text-secondary);">
+                                Generative speech technologies are advancing at an unprecedented pace, giving malicious actors the ability to clone voices with high fidelity.
+                            </p>
+                            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                                Modern attacks bypass traditional Automatic Speaker Verification (ASV) systems by mimicking micro-structures, voice tones, and natural prosody, creating critical security risks in banking, authentication, and communications.
+                            </p>
+                            <div style="background: rgba(255, 145, 25, 0.04); border-left: 4px solid var(--accent); padding: 1rem; border-radius: var(--radius-sm); margin-top: 0.5rem;">
+                                <strong style="font-size: 0.9rem; color: #b45309;"><i class="fa-solid fa-triangle-exclamation"></i> Core Vulnerability:</strong>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">Standard spectral representations (like MFCCs/spectrograms) often throw away raw phase variations where synthesizers leave their primary footprints.</p>
+                            </div>
+                        </div>
+                        <div class="grid-half" style="grid-template-columns: 1fr; gap: 1rem;">
+                            <div class="slide-card" style="padding: 1.25rem;">
+                                <h3 style="color: var(--accent);"><i class="fa-solid fa-keyboard"></i> Text-To-Speech (TTS)</h3>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Generating arbitrary speech from raw text inputs using neural vocoders like WaveNet, WaveRNN, or Tacotron.</p>
+                            </div>
+                            <div class="slide-card" style="padding: 1.25rem;">
+                                <h3 style="color: var(--accent);"><i class="fa-solid fa-arrows-spin"></i> Voice Conversion (VC)</h3>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary);">Converting the speaker identity of a source utterance to match a target speaker while preserving the spoken content.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3: Existing vs. Proposed System -->
+            <div class="slide" id="slide-3">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">02 / Comparative Analysis</span>
+                    <h2 class="slide-title">Existing System vs. Proposed VoiceGuard AI</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="comparison-container">
+                        <!-- Baseline Column -->
+                        <div class="comp-column baseline">
+                            <h3><i class="fa-solid fa-circle-xmark"></i> Baseline System (Standard AASIST)</h3>
+                            <div class="comp-features">
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <div>
+                                        <strong>128 Sinc Kernel:</strong> Receptive field is restricted to ~8ms. Fails to capture long-range phase patterns and temporal coherence of generative networks.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <div>
+                                        <strong>Mean-Only Pooling Readout:</strong> Graph node representation is averaged. Cues from isolated, sparse synthetic artifact peaks are completely suppressed.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <div>
+                                        <strong>No Frequency Masking:</strong> Highly prone to overfitting narrow frequency bands in training, causing performance to tank on unseen high-quality synthetic audio.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <div>
+                                        <strong>Black-Box Verdicts:</strong> Yields a classification score with zero visual evidence, providing no forensic utility for auditing false decisions.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Proposed Column -->
+                        <div class="comp-column proposed">
+                            <h3><i class="fa-solid fa-circle-check"></i> Proposed System (VoiceGuard AASIST-L v7)</h3>
+                            <div class="comp-features">
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <div>
+                                        <strong>Expanded 1024 Sinc Kernel:</strong> Expands the wave receptive field to ~64ms. Successfully captures the long-range phase shifts left by WaveNet and neural vocoders.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <div>
+                                        <strong>Fused Mean & Max Readout:</strong> Aggregates both average trends and maximum peaks. Preserves sparse, isolated spoofing signatures from specific graph nodes.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <div>
+                                        <strong>SpecAugment Channel Masking:</strong> Randomly masks up to 10 SincConv channels in training. Forces the model to generalize across the entire spectrum.
+                                    </div>
+                                </div>
+                                <div class="comp-item">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <div>
+                                        <strong>Dual-Branch Grad-CAM (XAI):</strong> Backpropagates gradients to map and overlay precise spectro-temporal anomalies on Mel Spectrograms.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4: Core AASIST-L Architecture -->
+            <div class="slide" id="slide-4">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">03 / Model Architecture</span>
+                    <h2 class="slide-title">AASIST-L: Spectro-Temporal Graph Network</h2>
+                </div>
+                <div class="slide-body" style="flex-direction: column; gap: 1rem;">
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); width: 100%;">
+                        Instead of treating spectrograms as images, AASIST models speech as an integrated heterogeneous graph of spectral and temporal components.
+                    </p>
+                    <div class="diagram-container">
+                        <!-- Custom SVG flow representing AASIST -->
+                        <svg class="diagram-svg" viewBox="0 0 1000 250">
+                            <!-- Definitions for Gradients and Markers -->
+                            <defs>
+                                <linearGradient id="grad-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="rgba(255, 145, 25, 0.9)" />
+                                    <stop offset="100%" stop-color="rgba(255, 119, 0, 0.9)" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#3b82f6" />
+                                    <stop offset="100%" stop-color="#1d4ed8" />
+                                </linearGradient>
+                                <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#8b5cf6" />
+                                    <stop offset="100%" stop-color="#6d28d9" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="#cbd5e1" />
+                                </marker>
+                                <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(255, 145, 25, 0.9)" />
+                                </marker>
+                            </defs>
+                            
+                            <!-- SVG Grid Nodes -->
+                            <!-- Raw Audio -->
+                            <g class="svg-node" transform="translate(10, 85)">
+                                <rect x="0" y="0" width="130" height="70" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+                                <text x="65" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#0f172a">RAW AUDIO WAVE</text>
+                                <text x="65" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#64748b" text-anchor="middle">16kHz · 64600 samples</text>
+                            </g>
+                            
+                            <!-- Line 1 -->
+                            <line x1="140" y1="120" x2="175" y2="120" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            
+                            <!-- SincConv -->
+                            <g class="svg-node" transform="translate(180, 85)">
+                                <rect x="0" y="0" width="140" height="70" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+                                <text x="70" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#0f172a">SINCCONV FRONTEND</text>
+                                <text x="70" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#eab308" font-weight="700" text-anchor="middle">KERNEL: 1024 (v7)</text>
+                            </g>
+                            
+                            <!-- Fork lines -->
+                            <path d="M 320 120 L 345 120 L 345 60 L 365 60" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            <path d="M 320 120 L 345 120 L 345 180 L 365 180" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            
+                            <!-- Spectral Encoder -->
+                            <g class="svg-node" transform="translate(370, 25)">
+                                <rect x="0" y="0" width="160" height="70" rx="10" fill="rgba(59, 130, 246, 0.05)" stroke="#3b82f6" stroke-width="1.5"/>
+                                <text x="80" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#1d4ed8">SPECTRAL ENCODER</text>
+                                <text x="80" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#3b82f6" text-anchor="middle">4 ResBlocks · Stride 3</text>
+                            </g>
+                            
+                            <!-- Temporal Encoder -->
+                            <g class="svg-node" transform="translate(370, 145)">
+                                <rect x="0" y="0" width="160" height="70" rx="10" fill="rgba(139, 92, 246, 0.05)" stroke="#8b5cf6" stroke-width="1.5"/>
+                                <text x="80" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#6d28d9">TEMPORAL ENCODER</text>
+                                <text x="80" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#8b5cf6" text-anchor="middle">4 ResBlocks · Stride 5,3</text>
+                            </g>
+                            
+                            <!-- Join lines to GAT -->
+                            <path d="M 530 60 L 565 60 L 565 100 L 585 100" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            <path d="M 530 180 L 565 180 L 565 140 L 585 140" fill="none" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            
+                            <!-- HGAT Fusion -->
+                            <g class="svg-node" transform="translate(590, 85)">
+                                <rect x="0" y="0" width="150" height="70" rx="10" fill="url(#grad-accent)" stroke="none"/>
+                                <text x="75" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#ffffff">HGAT ATTENTION</text>
+                                <text x="75" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="rgba(255, 255, 255, 0.85)" text-anchor="middle">2-Stage Relation Modeling</text>
+                            </g>
+                            
+                            <!-- Line to Pooling -->
+                            <line x1="740" y1="120" x2="775" y2="120" stroke="#cbd5e1" stroke-width="2" marker-end="url(#arrow)" />
+                            
+                            <!-- Pooling Readout -->
+                            <g class="svg-node" transform="translate(780, 85)">
+                                <rect x="0" y="0" width="110" height="70" rx="10" fill="#f8fafc" stroke="#f59e0b" stroke-width="1.5"/>
+                                <text x="55" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="600" text-anchor="middle" fill="#0f172a">READOUT (v7)</text>
+                                <text x="55" y="50" font-family="'Plus Jakarta Sans', sans-serif" font-size="9" fill="#d97706" font-weight="700" text-anchor="middle">MEAN + MAX</text>
+                            </g>
+                            
+                            <!-- Line to FC -->
+                            <line x1="890" y1="120" x2="915" y2="120" stroke="rgba(255, 145, 25, 0.9)" stroke-width="2" marker-end="url(#arrow-orange)" />
+                            
+                            <!-- Output -->
+                            <g class="svg-node" transform="translate(920, 85)">
+                                <ellipse cx="35" cy="35" rx="35" ry="35" fill="#1e293b" stroke="none"/>
+                                <text x="35" y="32" font-family="'Outfit', sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="#ffffff">VERDICT</text>
+                                <text x="35" y="47" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#10b981" font-weight="700" text-anchor="middle">Bona / Spoof</text>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5: Graph Attention Networks Deep Dive -->
+            <div class="slide" id="slide-5">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">04 / Architecture Deep Dive</span>
+                    <h2 class="slide-title">Heterogeneous Graph Attention (HGAT)</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-diagram-project" style="color: var(--accent);"></i> Relational Modeling</h3>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                                Standard CNNs and RNNs process features on a fixed grid, which overlooks remote dependencies.
+                            </p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                AASIST represents spectral segments and temporal frames as separate nodes. The Heterogeneous Graph Attention Network (HGAT) propagates messages across these branches.
+                            </p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                GAT layers compute dynamic attention weights between nodes to let the model select and amplify key anomaly regions.
+                            </p>
+                        </div>
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-server" style="color: var(--accent);"></i> The Multi-Head GAT Layer</h3>
+                            <div style="background: rgba(0, 0, 0, 0.02); padding: 1rem; border-radius: var(--radius-sm); font-family: monospace; font-size: 0.75rem; border: 1px solid var(--panel-border);">
+                                <span style="color: #64748b;"># PyTorch implementation snippet</span><br>
+                                <span style="color: #0f172a; font-weight: 700;">class</span> HeteroGraphAttention(nn.Module):<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;...<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #0f172a; font-weight: 700;">def</span> forward(self, spec_nodes, temp_nodes):<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s = torch.cat([h(spec_nodes) ...])<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;t = torch.cat([h(temp_nodes) ...])<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #0f172a; font-weight: 700;">return</span> self.proj(torch.cat([s, t], dim=-1))
+                            </div>
+                            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                Features are projected across 4 independent attention heads. This multi-head structure stabilizes training and isolates multiple concurrent artifact frequencies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6: Key Optimizations (v7 Enhancements) -->
+            <div class="slide" id="slide-6">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">05 / Key Optimizations</span>
+                    <h2 class="slide-title">v7 Enhancements for WaveNet Attacks</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-third">
+                        <!-- Kernel Expansion -->
+                        <div class="slide-card">
+                            <div style="background: #fffbeb; width: 45px; height: 45px; border-radius: var(--radius-sm); display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255, 145, 25, 0.2);">
+                                <i class="fa-solid fa-arrows-left-right-to-line" style="font-size: 1.25rem; color: var(--accent);"></i>
+                            </div>
+                            <h3>1. Sinc Kernel 128 → 1024</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                                Receptive field is expanded to ~64ms (8× wider). Captures phase shifts and structural variations in high-quality TTS/VC syntheses (like A18 WaveNet) that baseline models miss.
+                            </p>
+                        </div>
+                        
+                        <!-- Readout Pool -->
+                        <div class="slide-card">
+                            <div style="background: #f0fdf4; width: 45px; height: 45px; border-radius: var(--radius-sm); display: flex; justify-content: center; align-items: center; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <i class="fa-solid fa-arrow-down-wide-narrow" style="font-size: 1.25rem; color: var(--safe);"></i>
+                            </div>
+                            <h3>2. Mean & Max Readout</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                                Upgrades the pooling layer from mean-only to a fused mean & max representation. Max pooling preserves isolated, sparse artifact peaks that mean-pooling suppresses.
+                            </p>
+                        </div>
+
+                        <!-- Freq Masking -->
+                        <div class="slide-card">
+                            <div style="background: #eff6ff; width: 45px; height: 45px; border-radius: var(--radius-sm); display: flex; justify-content: center; align-items: center; border: 1px solid rgba(59, 130, 246, 0.2);">
+                                <i class="fa-solid fa-mask" style="font-size: 1.25rem; color: #3b82f6;"></i>
+                            </div>
+                            <h3>3. Frequency Masking</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                                Masks up to 10 consecutive SincConv channels in training. Forces the model to look for artifact cues across the full spectrum rather than relying on a narrow, easily synthesized band.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 7: Training Pipeline & Data -->
+            <div class="slide" id="slide-7">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">06 / Training Pipeline</span>
+                    <h2 class="slide-title">Training Logistics & Augmentations</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-database" style="color: var(--accent);"></i> ASVspoof 2019 LA Dataset</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                                Evaluated on the Logical Access (LA) partition of ASVspoof 2019:
+                            </p>
+                            <ul style="margin-top: 0.25rem;">
+                                <li><strong>Train:</strong> 25,380 utterances (A01 - A06 spoof algorithms).</li>
+                                <li><strong>Evaluation:</strong> 71,747 utterances with 13 unseen attacks (A07 - A19).</li>
+                                <li><strong>Class Imbalance:</strong> 9:1 spoof-to-bonafide ratio (corrected via weighted CrossEntropy).</li>
+                            </ul>
+                        </div>
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-gears" style="color: var(--accent);"></i> Augmentation & Schedule</h3>
+                            <ul style="margin-top: 0.25rem;">
+                                <li><strong>Waveform Augmentation:</strong> SpeedPerturb (0.9x-1.1x speed), RandomGain, and GaussianNoise applied on raw audio.</li>
+                                <li><strong>Scheduler:</strong> 30 Epoch schedule. 4-epoch warmup followed by Cosine Annealing decay.</li>
+                                <li><strong>Stochastic Weight Averaging (SWA):</strong> Activates at epoch 20 to compute running parameter averages, smoothing the loss landscape.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8: Explainable AI (Grad-CAM) -->
+            <div class="slide" id="slide-8">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">07 / Explainable AI (XAI)</span>
+                    <h2 class="slide-title">Dual-Branch Grad-CAM Forensic overlays</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-brain" style="color: var(--accent);"></i> The Visual Explanation Engine</h3>
+                            <p style="font-size: 0.88rem; color: var(--text-secondary);">
+                                To make neural predictions auditable, we implement Grad-CAM (Gradient-weighted Class Activation Mapping) on the 1D convolution streams.
+                            </p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                <strong>1. Dual-Branch Fusion:</strong> Taps early activations in the Spectral and Temporal encoders. This prevents the loss of temporal resolution caused by deep pooling.
+                            </p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                <strong>2. Percentile Normalization:</strong> Clips extreme outlier gradients (bottom 2%, top 98%) before scaling, producing stable, clean color ranges.
+                            </p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">
+                                <strong>3. Spectrogram Alignment:</strong> Bilinearly interpolates 1D CAM maps to 2D dimensions, overlaying them on Mel Spectrograms at 50% opacity.
+                            </p>
+                        </div>
+                        <div class="slide-card" style="align-items: center; justify-content: center; background: #0b0f19; border-color: #1e293b;">
+                            <div style="width: 100%; text-align: center; color: #94a3b8; font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: bold;">Grad-CAM Saliency Overlay (Inferno Colorbar)</div>
+                            <!-- Mockup representing Spectrogram overlay -->
+                            <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #1e1b4b 0%, #311042 100%); border-radius: var(--radius-sm); overflow: hidden; display: flex; justify-content: center; align-items: center;">
+                                <!-- Waveform lines -->
+                                <svg width="90%" height="80%" viewBox="0 0 300 100" opacity="0.8">
+                                    <path d="M 0 50 Q 30 10, 60 50 T 120 50 T 180 50 T 240 50 T 300 50" fill="none" stroke="#6366f1" stroke-width="1.5" />
+                                    <!-- Heatmap elements -->
+                                    <rect x="70" y="10" width="50" height="80" fill="rgba(239, 68, 68, 0.45)" filter="blur(6px)" />
+                                    <rect x="200" y="15" width="40" height="70" fill="rgba(245, 158, 11, 0.45)" filter="blur(6px)" />
+                                </svg>
+                                <span style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #f43f5e; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: 700; border: 1px solid rgba(244,63,94,0.3);">ANOMALY AT 1.2s</span>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #64748b; line-height: 1.4; margin-top: 0.5rem; text-align: center; width: 90%;">
+                                Heatmap highlights exact temporal anomalies matching synthetic voice artifacts.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9: End-To-End System Workflow (Interactive) -->
+            <div class="slide" id="slide-9">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">08 / Operations</span>
+                    <h2 class="slide-title">Interactive End-to-End System Workflow</h2>
+                </div>
+                <div class="slide-body" style="flex-direction: column; gap: 1.5rem;">
+                    <p style="font-size: 0.95rem; color: var(--text-secondary); width: 100%;">
+                        Click the workflow steps below to inspect how audio runs through our system:
+                    </p>
+                    
+                    <div class="flow-container">
+                        <div class="flow-line-bg"></div>
+                        <div class="flow-line-progress" id="flow-progress"></div>
+                        
+                        <!-- Step 1 -->
+                        <div class="flow-step active" id="fstep-1" onclick="selectFlowStep(1)">
+                            <i class="fa-solid fa-microphone"></i>
+                            <h4>1. Input</h4>
+                            <p>Upload / Record</p>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="flow-step" id="fstep-2" onclick="selectFlowStep(2)">
+                            <i class="fa-solid fa-wave-square"></i>
+                            <h4>2. Process</h4>
+                            <p>Resample & Pad</p>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="flow-step" id="fstep-3" onclick="selectFlowStep(3)">
+                            <i class="fa-solid fa-network-wired"></i>
+                            <h4>3. Inference</h4>
+                            <p>AASIST Model</p>
+                        </div>
+                        <!-- Step 4 -->
+                        <div class="flow-step" id="fstep-4" onclick="selectFlowStep(4)">
+                            <i class="fa-solid fa-calculator"></i>
+                            <h4>4. Decision</h4>
+                            <p>Confidence Card</p>
+                        </div>
+                        <!-- Step 5 -->
+                        <div class="flow-step" id="fstep-5" onclick="selectFlowStep(5)">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <h4>5. Grad-CAM</h4>
+                            <p>XAI Backprop</p>
+                        </div>
+                        <!-- Step 6 -->
+                        <div class="flow-step" id="fstep-6" onclick="selectFlowStep(6)">
+                            <i class="fa-solid fa-display"></i>
+                            <h4>6. Render</h4>
+                            <p>Verdict Screen</p>
+                        </div>
+                    </div>
+
+                    <!-- Flow Detail Card -->
+                    <div class="flow-detail-card" id="flow-details">
+                        <div class="flow-detail-icon">
+                            <i class="fa-solid fa-microphone" id="flow-detail-icon-class"></i>
+                        </div>
+                        <div class="flow-detail-text">
+                            <h4 id="flow-detail-title">1. Audio Capture (Browser Client)</h4>
+                            <p id="flow-detail-desc">
+                                The user uploads a pre-recorded audio file (WAV, MP3, FLAC) or records voice live through the browser using raw HTML5 MediaRecorder APIs. Live audio is visualized using WebAudio analyzer nodes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10: Web Dashboard Features -->
+            <div class="slide" id="slide-10">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">09 / User Interface</span>
+                    <h2 class="slide-title">The Forensic Web Dashboard</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-display" style="color: var(--accent);"></i> Interactive UI Highlights</h3>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                                Designed to translate complex deep learning logits into clear, actionable security verdicts.
+                            </p>
+                            <ul>
+                                <li><strong>Universal Drag-and-Drop:</strong> Preprocesses uploads asynchronously using AJAX.</li>
+                                <li><strong>Score & Threshold Meter:</strong> Maps logits relative to the Equal Error Rate (EER) threshold of 0.0651, categorizing results into Low, Medium, and High threat levels.</li>
+                                <li><strong>Dynamic Saliency Display:</strong> Shows the Grad-CAM image side-by-side with security metrics.</li>
+                            </ul>
+                        </div>
+                        <!-- UI Wireframe Mockup -->
+                        <div class="slide-card" style="padding: 1.25rem; font-family: sans-serif; background: #ffffff; border: 1px solid var(--panel-border); font-size: 0.75rem;">
+                            <!-- Header Mock -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem; margin-bottom: 0.75rem;">
+                                <span style="font-weight: bold; color: var(--accent);"><i class="fa-solid fa-shield-halved"></i> VoiceGuard AI</span>
+                                <span style="background: #f0fdf4; color: #16a34a; padding: 2px 8px; border-radius: 10px; font-size: 0.65rem; font-weight: bold;">EER 2.74%</span>
+                            </div>
+                            
+                            <!-- Content Mock -->
+                            <div class="grid-half" style="grid-template-columns: 1.1fr 0.9fr; gap: 0.5rem;">
+                                <!-- Left Panel Mock -->
+                                <div style="border: 1px dashed #cbd5e1; border-radius: var(--radius-sm); padding: 1.25rem; text-align: center;">
+                                    <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: var(--accent); margin-bottom: 0.25rem;"></i>
+                                    <div style="font-weight: bold; font-size: 0.8rem;">Upload File</div>
+                                    <div style="color: #64748b; font-size: 0.6rem; margin-top: 0.25rem;">WAV, MP3 up to 10MB</div>
+                                </div>
+                                <!-- Right Panel Mock -->
+                                <div style="background: #fff5eb; border: 1px solid #ffe3c2; border-radius: var(--radius-sm); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.25rem;">
+                                    <div style="font-weight: bold; color: #c2410c;">Analysis Report</div>
+                                    <div style="font-weight: 800; font-size: 1rem; color: #dc2626;">SPOOFED</div>
+                                    <div style="height: 4px; background: #e2e8f0; border-radius: 2px; overflow: hidden; margin-top: 0.25rem;">
+                                        <div style="width: 92%; height: 100%; background: #dc2626;"></div>
+                                    </div>
+                                    <div style="color: #64748b; font-size: 0.6rem;">Confidence: 92.4%</div>
+                                </div>
+                            </div>
+                            <!-- Heatmap Box Mock -->
+                            <div style="border: 1px solid #e2e8f0; border-radius: var(--radius-sm); background: #0f172a; height: 50px; margin-top: 0.5rem; display: flex; justify-content: center; align-items: center; color: #94a3b8; font-size: 0.65rem;">
+                                <i class="fa-solid fa-eye" style="margin-right: 0.25rem;"></i> Grad-CAM Spectral Overlay Active
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 11: Tech Stack & Takeaways -->
+            <div class="slide" id="slide-11">
+                <div class="slide-title-area">
+                    <span class="slide-subtitle">10 / Conclusion</span>
+                    <h2 class="slide-title">Technical Stack & Key Takeaways</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="grid-half">
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-cubes" style="color: var(--accent);"></i> The Technical Stack</h3>
+                            <ul style="margin-top: 0.25rem;">
+                                <li><strong>Model & Deep Learning:</strong> PyTorch (SincConv, HGAT, AveragedModel).</li>
+                                <li><strong>Audio Preprocessing:</strong> Librosa, SoundFile (16kHz resampling, repeat padding).</li>
+                                <li><strong>Explainability Layer:</strong> Custom Grad-CAM (using PyTorch backward hooks).</li>
+                                <li><strong>Backend Server:</strong> Flask (Python 3) handling APIs and serving views.</li>
+                                <li><strong>Frontend Dashboard:</strong> Vanilla HTML5, CSS3 Variables, JavaScript.</li>
+                            </ul>
+                        </div>
+                        <div class="slide-card">
+                            <h3><i class="fa-solid fa-award" style="color: var(--accent);"></i> Key Achievements</h3>
+                            <ul style="margin-top: 0.25rem;">
+                                <li><strong>Unseen Attack Generalization:</strong> v7 updates specifically resolve EER spikes on advanced generative voice attacks (e.g., A18 WaveNet).</li>
+                                <li><strong>Outstanding Metrics:</strong> Achieves a validation Equal Error Rate (EER) of <strong>2.28% - 2.74%</strong>.</li>
+                                <li><strong>Explainable Forensics:</strong> Shifts the paradigm from black-box classifications to white-box auditable saliency maps.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Bottom Controls -->
+        <footer class="bottom-bar">
+            <!-- Nav Controls -->
+            <div class="nav-controls">
+                <button class="btn" onclick="toggleTOC()"><i class="fa-solid fa-list"></i> Slides</button>
+                <button class="btn" onclick="prevSlide()"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                <div class="slide-counter" id="slide-counter">Slide 1 of 11</div>
+                <button class="btn" onclick="nextSlide()">Next <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="deck-progress-bar-container">
+                <div class="deck-progress-bar" id="deck-progress"></div>
+            </div>
+
+            <!-- Utility Controls -->
+            <div class="utility-controls">
+                <button class="btn" onclick="toggleNotes()"><i class="fa-solid fa-note-sticky"></i> Notes</button>
+                <button class="btn" onclick="printPresentation()" title="Save Slide Deck to PDF"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+                <button class="btn" onclick="toggleHelp()"><i class="fa-solid fa-circle-question"></i> Help</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Table of Contents Sidebar -->
+    <div class="sidebar" id="toc-sidebar">
+        <div class="sidebar-header">
+            <h2>Table of Contents</h2>
+            <button class="sidebar-close" onclick="toggleTOC()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <ul class="toc-list">
+            <li class="toc-item active" onclick="jumpToSlide(1)"><span>01</span> Cover Slide</li>
+            <li class="toc-item" onclick="jumpToSlide(2)"><span>02</span> The Threat Landscape</li>
+            <li class="toc-item" onclick="jumpToSlide(3)"><span>03</span> Baseline vs. VoiceGuard</li>
+            <li class="toc-item" onclick="jumpToSlide(4)"><span>04</span> AASIST-L Architecture</li>
+            <li class="toc-item" onclick="jumpToSlide(5)"><span>05</span> GAT & Message Passing</li>
+            <li class="toc-item" onclick="jumpToSlide(6)"><span>06</span> Key Optimizations (v7)</li>
+            <li class="toc-item" onclick="jumpToSlide(7)"><span>07</span> Training & Logistics</li>
+            <li class="toc-item" onclick="jumpToSlide(8)"><span>08</span> Explainable AI (XAI)</li>
+            <li class="toc-item" onclick="jumpToSlide(9)"><span>09</span> Interactive Flowchart</li>
+            <li class="toc-item" onclick="jumpToSlide(10)"><span>10</span> Forensic Web Dashboard</li>
+            <li class="toc-item" onclick="jumpToSlide(11)"><span>11</span> Tech Stack & Takeaways</li>
+        </ul>
+    </div>
+
+    <!-- Presenter Notes Slide-up Panel -->
+    <div class="notes-panel" id="notes-panel">
+        <div class="notes-header">
+            <h3><i class="fa-solid fa-note-sticky"></i> Presenter Notes</h3>
+            <button class="notes-close" onclick="toggleNotes()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="notes-content" id="notes-content">
+            <!-- Dynamic presenter notes are loaded here -->
+            <p>Welcome your audience. Introduce the goals of the VoiceGuard AI project: to address the growing threat of deepfake voice cloning using advanced graph architectures and explainability systems.</p>
+        </div>
+    </div>
+
+    <!-- Help Modal Overlay -->
+    <div class="modal-overlay" id="help-modal" onclick="if(event.target === this) toggleHelp()">
+        <div class="modal-card">
+            <h3><i class="fa-solid fa-circle-question"></i> Slide Deck Shortcuts</h3>
+            <div class="keyboard-shortcuts-grid">
+                <div><span class="k-key">→</span> or <span class="k-key">Space</span></div>
+                <div>Advance to the next slide</div>
+                
+                <div><span class="k-key">←</span></div>
+                <div>Go back to the previous slide</div>
+                
+                <div><span class="k-key">Esc</span></div>
+                <div>Close open sidebar or panels</div>
+                
+                <div><span class="k-key">T</span></div>
+                <div>Toggle Table of Contents sidebar</div>
+                
+                <div><span class="k-key">N</span></div>
+                <div>Toggle Presenter Notes panel</div>
+                
+                <div><span class="k-key">P</span></div>
+                <div>Open Print Dialog (Export to PDF)</div>
+            </div>
+            <button class="btn btn-primary" onclick="toggleHelp()" style="margin-top: 0.5rem; align-self: flex-end;">Close Help</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTS & STATE ---
+        const totalSlides = 11;
+        let currentSlide = 1;
+
+        // Presenter Notes Database
+        const speakerNotes = {
+            1: `
+                <ul>
+                    <li><strong>Goal:</strong> Welcoming slide. Introduce VoiceGuard AI as a state-of-the-art solution to synthetic speech detection.</li>
+                    <li><strong>Context:</strong> Explain that this project implements a highly refined version (v7) of the AASIST network, combined with a custom Flask dashboard and a dual-branch Grad-CAM explanation layer.</li>
+                    <li><strong>Metrics:</strong> Mention the competitive validation Equal Error Rate (EER) of 2.28% to 2.74%.</li>
+                </ul>
+            `,
+            2: `
+                <ul>
+                    <li><strong>The Threat:</strong> Voice cloning and speech synthesis are easy to deploy with high-quality models (like WaveNet, WaveRNN, FastSpeech).</li>
+                    <li><strong>Biometric Vulnerability:</strong> Traditional speaker verification models check voice signatures but ignore tiny structural artifacts left by neural generators.</li>
+                    <li><strong>Problem:</strong> Generative models replicate the magnitude spectrum well but leave anomalies in the phase spectrum. SincConv handles this by studying raw waveforms directly.</li>
+                </ul>
+            `,
+            3: `
+                <ul>
+                    <li><strong>Baseline:</strong> Explain that traditional AASIST was prone to failing on unseen speech generators. A18 and A17 evaluation files (WaveNet/WaveRNN-based voice conversion/TTS) caused significant error spikes.</li>
+                    <li><strong>Kernel Expansion:</strong> Enlarging the sinc_kernel to 1024 increases the receptive field 8×, capturing long-term phase shifts.</li>
+                    <li><strong>Mean+Max Pooling:</strong> Averaging graph nodes washes out spikes. Max pooling retains sparse anomaly peaks.</li>
+                    <li><strong>Frequency Masking:</strong> SpecAugment-style masking forces the network to look for patterns across the entire spectrum.</li>
+                    <li><strong>Auditing:</strong> Mention that white-box auditing adds security audit trails for decisions.</li>
+                </ul>
+            `,
+            4: `
+                <ul>
+                    <li><strong>Graph Layout:</strong> Standard CNNs treat spectro-temporal features as regular image pixels, losing long-distance correlations.</li>
+                    <li><strong>Signal Pipeline:</strong> Raw audio (64,600 samples ~4.04s) runs into SincConv, which acts as a learnable filter bank.</li>
+                    <li><strong>Encoders:</strong> Split streams feed into Spectral and Temporal branches, preserving specific fine-grained resolutions before GAT fusion.</li>
+                </ul>
+            `,
+            5: `
+                <ul>
+                    <li><strong>Message Passing:</strong> Explain that HGAT structures represent spectral nodes and temporal nodes as parts of a heterogeneous graph.</li>
+                    <li><strong>GAT Layers:</strong> The attention layers allow spectral nodes to query temporal nodes, exchanging features dynamically.</li>
+                    <li><strong>Multi-Head:</strong> Multi-head attention projects features onto different sub-spaces, making graph information propagation highly stable.</li>
+                </ul>
+            `,
+            6: `
+                <ul>
+                    <li><strong>v7 Rationale:</strong> Focus on the specific improvements that solved the ASVspoof LA evaluation performance bottleneck.</li>
+                    <li><strong>Receptive Field:</strong> Standard sinc_kernel was 128 (8ms), expanded to 1024 (64ms). Captured the long vocoder frames of WaveNet.</li>
+                    <li><strong>Pooling:</strong> Pooling max features preserves the transient, localized noise bursts created by synthesizers.</li>
+                    <li><strong>Generalization:</strong> FreqMask prevents the model from relying on small bands, making it highly robust to unseen speech synthesizers.</li>
+                </ul>
+            `,
+            7: `
+                <ul>
+                    <li><strong>ASVspoof:</strong> The ASVspoof 2019 Logical Access dataset is the gold standard for voice anti-spoofing research.</li>
+                    <li><strong>Evaluation Details:</strong> The evaluation dataset contains entirely unseen speech synthesizers (A07-A19), making it a true test of model generalization.</li>
+                    <li><strong>SWA:</strong> Stochastic Weight Averaging accumulates parameters starting at Epoch 20, smoothing out the loss surface for better generalization.</li>
+                    <li><strong>Augmentations:</strong> Speed, Gain, and Gaussian noise additions ensure robustness to different recording devices.</li>
+                </ul>
+            `,
+            8: `
+                <ul>
+                    <li><strong>The Black Box Problem:</strong> Deep learning models are notoriously hard to explain.</li>
+                    <li><strong>Resolution Tap:</strong> By tapping Block-1 early encoders, we avoid the heavy spatial downsampling of deeper blocks, preserving fine temporal resolution.</li>
+                    <li><strong>Fusion:</strong> Blending spectral and temporal activations provides a complete view of the anomaly.</li>
+                    <li><strong>Clipped Scaling:</strong> Percentile normalization (2%-98%) ensures a single noisy peak doesn't dominate the entire color spectrum of the heatmap.</li>
+                </ul>
+            `,
+            9: `
+                <ul>
+                    <li><strong>Real-time Flow:</strong> Guide the audience through the end-to-end processing pipeline, from frontend recording to server-side inference and visualization.</li>
+                    <li><strong>Frontend Capture:</strong> Audio is captured locally in index.html (raw PCM in browser).</li>
+                    <li><strong>Server Prep:</strong> Flask backend resamples the clip to 16kHz and mono, applying repeat-padding to match the model's expected shape.</li>
+                    <li><strong>Response:</strong> The server computes predictions, triggers Grad-CAM, and returns JSON containing probabilities, verdict, and the heatmap URL.</li>
+                </ul>
+            `,
+            10: `
+                <ul>
+                    <li><strong>UI Design:</strong> The client dashboard uses a premium layout with a dark/light glassmorphic aesthetic.</li>
+                    <li><strong>Decision Metaphor:</strong> The EER threshold 0.0651 is displayed on a slider relative to the score, providing clear risk classifications (Low/Medium/High).</li>
+                    <li><strong>Explainable Reports:</strong> Displaying the Grad-CAM overlay side-by-side with metrics gives forensic auditors the exact timestamp of anomalies.</li>
+                </ul>
+            `,
+            11: `
+                <ul>
+                    <li><strong>Deployment:</strong> The stack uses lightweight Python (Flask) orchestrating PyTorch and Librosa.</li>
+                    <li><strong>Trainable Size:</strong> AASIST-L is extremely compact (~0.3M parameters) compared to heavy ResNet wrappers, enabling fast server-side CPU/GPU inference.</li>
+                    <li><strong>Conclusion:</strong> VoiceGuard AI provides a highly generalized, interpretable, and production-ready defense against modern deepfake voice cloning.</li>
+                </ul>
+            `
+        };
+
+        // Workflow details Database
+        const flowStepsData = {
+            1: {
+                title: "1. Audio Capture (Browser Client)",
+                desc: "The user uploads a pre-recorded audio file (WAV, MP3, FLAC) or records voice live through the browser using raw HTML5 MediaRecorder APIs. Live audio is visualized using WebAudio analyzer nodes.",
+                icon: "fa-microphone"
+            },
+            2: {
+                title: "2. Audio Preprocessing (Server Backend)",
+                desc: "The Flask server processes the audio byte-stream using Librosa and SoundFile. It converts multi-channel audio to mono, resamples it to exactly 16,000 Hz, and applies paper-exact repeat-padding or cropping to form a 64,600 sample array (~4.04s).",
+                icon: "fa-wave-square"
+            },
+            3: {
+                title: "3. Neural Network Inference (PyTorch)",
+                desc: "The preprocessed array is sent to the AASIST-L v7 network. SincConv filters extract features, Spectral & Temporal encoders build resolutions, and HGAT attention layers model relations to yield final classification logits.",
+                icon: "fa-network-wired"
+            },
+            4: {
+                title: "4. Verdict & Risk Level Calculation",
+                desc: "Logits are mapped via Softmax. If the spoof probability exceeds the EER decision threshold of 0.0651, the audio is classified as SPOOF. Confidence scores are normalized relative to this threshold to yield Low, Medium, or High risk levels.",
+                icon: "fa-calculator"
+            },
+            5: {
+                title: "5. Dual-Branch Grad-CAM (XAI Generation)",
+                desc: "Gradients are backpropagated with respect to the predicted class score. Saliency maps from early spectral and temporal blocks are fused, normalized via percentiles, overlaid on the Mel Spectrogram, and saved as a PNG heatmap.",
+                icon: "fa-chart-line"
+            },
+            6: {
+                title: "6. UI Rendering & Auditing",
+                desc: "The server returns a JSON package. The frontend removes the spinner and displays the verdict card, risk badge, confidence gauge, and overlays the Grad-CAM heatmap, allowing immediate verification.",
+                icon: "fa-display"
+            }
+        };
+
+        // --- SLIDE NAVIGATION FUNCTIONS ---
+        function updateDeckUI() {
+            // Update Slide Stage Classes
+            for (let i = 1; i <= totalSlides; i++) {
+                const slideEl = document.getElementById(`slide-${i}`);
+                if (i === currentSlide) {
+                    slideEl.className = 'slide active';
+                } else if (i < currentSlide) {
+                    slideEl.className = 'slide prev-slide';
+                } else {
+                    slideEl.className = 'slide';
+                }
+            }
+
+            // Update Counter
+            document.getElementById('slide-counter').innerText = `Slide ${currentSlide} of ${totalSlides}`;
+
+            // Update Progress Bar
+            const percent = ((currentSlide - 1) / (totalSlides - 1)) * 100;
+            document.getElementById('deck-progress').style.width = `${percent}%`;
+
+            // Update Table of Contents highlights
+            const tocItems = document.querySelectorAll('.toc-item');
+            tocItems.forEach((item, idx) => {
+                if (idx + 1 === currentSlide) {
+                    item.className = 'toc-item active';
+                } else {
+                    item.className = 'toc-item';
+                }
+            });
+
+            // Update Presenter Notes
+            document.getElementById('notes-content').innerHTML = speakerNotes[currentSlide];
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                updateDeckUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 1) {
+                currentSlide--;
+                updateDeckUI();
+            }
+        }
+
+        function jumpToSlide(num) {
+            if (num >= 1 && num <= totalSlides) {
+                currentSlide = num;
+                updateDeckUI();
+                // Close sidebar after jump
+                document.getElementById('toc-sidebar').classList.remove('open');
+            }
+        }
+
+        // --- SIDEBAR (TOC) CONTROLS ---
+        function toggleTOC() {
+            document.getElementById('toc-sidebar').classList.toggle('open');
+            // Close notes if open to avoid overlap
+            document.getElementById('notes-panel').classList.remove('open');
+        }
+
+        // --- NOTES PANEL CONTROLS ---
+        function toggleNotes() {
+            document.getElementById('notes-panel').classList.toggle('open');
+            // Close sidebar if open
+            document.getElementById('toc-sidebar').classList.remove('open');
+        }
+
+        // --- HELP MODAL CONTROLS ---
+        function toggleHelp() {
+            document.getElementById('help-modal').classList.toggle('open');
+        }
+
+        // --- EXPORT PDF ---
+        function printPresentation() {
+            window.print();
+        }
+
+        // --- INTERACTIVE WORKFLOW STEP SELECTOR (SLIDE 9) ---
+        function selectFlowStep(stepNum) {
+            // Reset active steps
+            for (let i = 1; i <= 6; i++) {
+                const stepEl = document.getElementById(`fstep-${i}`);
+                if (i <= stepNum) {
+                    stepEl.classList.add('active');
+                } else {
+                    stepEl.classList.remove('active');
+                }
+            }
+            
+            // Update flow progress line width
+            const flowProgressEl = document.getElementById('flow-progress');
+            const percentWidth = ((stepNum - 1) / 5) * 90; // spans across steps
+            flowProgressEl.style.width = `${percentWidth}%`;
+
+            // Update text details card
+            const data = flowStepsData[stepNum];
+            document.getElementById('flow-detail-title').innerText = data.title;
+            document.getElementById('flow-detail-desc').innerText = data.desc;
+            
+            const iconEl = document.getElementById('flow-detail-icon-class');
+            iconEl.className = `fa-solid ${data.icon}`;
+        }
+
+        // --- KEYBOARD LISTENER ---
+        document.addEventListener('keydown', function(event) {
+            // If modals are open, close them on escape
+            if (event.key === 'Escape') {
+                document.getElementById('toc-sidebar').classList.remove('open');
+                document.getElementById('notes-panel').classList.remove('open');
+                document.getElementById('help-modal').classList.remove('open');
+                return;
+            }
+
+            // Shortcuts when no input is focused
+            if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                if (event.key === 'ArrowRight' || event.key === ' ' || event.key === 'PageDown') {
+                    event.preventDefault();
+                    nextSlide();
+                } else if (event.key === 'ArrowLeft' || event.key === 'PageUp') {
+                    event.preventDefault();
+                    prevSlide();
+                } else if (event.key === 't' || event.key === 'T') {
+                    toggleTOC();
+                } else if (event.key === 'n' || event.key === 'N') {
+                    toggleNotes();
+                } else if (event.key === 'h' || event.key === 'H' || event.key === '?') {
+                    toggleHelp();
+                } else if (event.key === 'p' || event.key === 'P') {
+                    event.preventDefault();
+                    printPresentation();
+                }
+            }
+        });
+
+        // Initialize UI
+        updateDeckUI();
+    </script>
+</body>
+</html>
